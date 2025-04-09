@@ -1,0 +1,212 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Conditional Access and Intune Compliance Overview"
+      },
+      "name": "text - intro"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Devices Not Compliant - Summary Table",
+        "style": "warning"
+      },
+      "name": "text - summary table"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "IntuneDeviceComplianceOrg\n| where ComplianceState == 'Not compliant'\n| project TimeGenerated, DeviceName, UPN, ComplianceState, Result\n| order by TimeGenerated desc",
+        "size": 1,
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "query - summary"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "Failed Logins\r\n",
+        "style": "error"
+      },
+      "name": "text - 11"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SigninLogs | where TimeGenerated > ago(1d) | project UserPrincipalName, ResultSignature, ResultDescription | where ResultSignature == \"FAILURE\"",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "query - 12"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "Failed Conditional Access\r\n",
+        "style": "error"
+      },
+      "name": "text - 13",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SigninLogs\r\n| where ConditionalAccessStatus == \"failure\"\r\n| project UserPrincipalName, UserDisplayName, Location, IPAddress, AppDisplayName, Status, ConditionalAccessPolicies, ConditionalAccessStatus, TimeGenerated\r\n| sort by TimeGenerated desc",
+        "size": 0,
+        "noDataMessage": "The data was stolen! Jokes! none to display!",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "query - 14"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "Intune Devices\r\n",
+        "style": "info"
+      },
+      "name": "Intune Devices"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "IntuneDevices | project DeviceName, UPN, OS, CompliantState, Model, SerialNumber",
+        "size": 0,
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "gridSettings": {
+          "sortBy": [
+            {
+              "itemKey": "CompliantState",
+              "sortOrder": 2
+            }
+          ]
+        },
+        "sortBy": [
+          {
+            "itemKey": "CompliantState",
+            "sortOrder": 2
+          }
+        ]
+      },
+      "name": "query - 10"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "param-timerange",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 604800000
+            },
+            "typeSettings": {
+              "selectableValues": [],
+              "allowCustom": true
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "Time Range Selector"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Failure Reasons by Setting"
+      },
+      "name": "text - failure reasons"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "IntuneDeviceComplianceOrg\n| where ComplianceState == 'Not compliant'\n| summarize Failures = count() by Result\n| sort by Failures desc",
+        "size": 2,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "barchart"
+      },
+      "name": "query - failure reasons"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "IntuneDeviceComplianceOrg\n| where ComplianceState == 'Not compliant'\n| summarize Failures = count() by Result\n| sort by Failures desc",
+        "size": 1,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Failures",
+              "formatter": 3,
+              "formatOptions": {
+                "showIcon": true
+              }
+            }
+          ]
+        }
+      },
+      "name": "query - failure reasons table"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Top Non-Compliant Devices"
+      },
+      "name": "text - top devices"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "IntuneDeviceComplianceOrg\n| where ComplianceState == 'Not compliant'\n| summarize Count = count() by DeviceName\n| top 10 by Count",
+        "size": 1,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "barchart"
+      },
+      "name": "query - top devices"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/284cb7d6-22fb-4352-ac1f-9fc2e985b124/resourceGroups/ne-logana-rg/providers/Microsoft.OperationalInsights/workspaces/koremonitoring"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
